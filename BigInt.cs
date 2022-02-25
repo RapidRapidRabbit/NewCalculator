@@ -6,30 +6,44 @@ using System.Threading.Tasks;
 
 namespace NewCalc
 {
-    public class BigInt
+    public class BigInt : IComparable<BigInt>// IComparer<BigInt>
     {
-        public List<byte> digits = new List<byte>(); // список для хранения цифр
+        private List<byte> digits = new List<byte>(); // список для хранения цифр
 
         public bool isNegativeValue { get; private set; } // отрицательное ли значение
         
         public int Length { get { return this.digits.Count(); } } // просто длина числового значения для удобства
 
-        private enum WhatValueIsGreater // для сравнения значений
+
+        // конструкторы из строки или числа, можно добавить другие при необходимости
+        public BigInt() { }
+        public BigInt(string value) 
         {
-            First,
-            Second,
-            Same
-        }
-
-
-        public BigInt(string value) // конструктор, можно добавить другие при необходимости
-        {            
+            if (value[0] == '-')
+                isNegativeValue = true;
             foreach (var c in value)
             {
                 digits.Add(Convert.ToByte(c.ToString()));
             }            
         }
-        public BigInt() { }
+        public BigInt(int value)
+        {
+            if (value < 0)
+            {
+                isNegativeValue = true;
+                value *= -1;
+            }
+            else if (value == 0)            
+                digits.Add(0);
+            
+
+            while (value > 0)
+            {
+                digits.Insert(0,((byte)(value % 10)));
+                value /= 10;
+            }
+        }
+        
 
 
         // свой ToString, возвращает значение 
@@ -49,26 +63,31 @@ namespace NewCalc
         }
 
 
-        //метод для сравнения значений
-        private static WhatValueIsGreater CompareValues(BigInt first, BigInt second)
+       //реализация IComparable<T>
+        public int CompareTo(BigInt obj)
         {
-            if (first.Length > second.Length)
-                return WhatValueIsGreater.First;
-            else if (second.Length > first.Length)
-                return WhatValueIsGreater.Second;
+            if (this.isNegativeValue == false && obj.isNegativeValue == true)
+                return 1;
+            if (this.isNegativeValue == true && obj.isNegativeValue == false)
+                return -1;
 
-            for(int i = 0; i < first.Length; i++)
+            if (this.Length > obj.Length)
+                return 1;
+            else if (obj.Length > this.Length)
+                return -1;
+
+            else
             {
-                if (first.digits[i] > second.digits[i])
-                    return WhatValueIsGreater.First;
-                else if (second.digits[i] > first.digits[i])
-                    return WhatValueIsGreater.Second;
-               
-                   
+                for (int i = 0; i < this.Length; i++)
+                {
+                    if (this.digits[i] > obj.digits[i])
+                        return 1;
+                    if (obj.digits[i] > this.digits[i])
+                        return -1;
+                }
             }
-
-            return WhatValueIsGreater.Same;
-        }
+            return 0;            
+        }       
 
         // далее идут методы арифметических вычислений, все построены на принципе вычислений в столбик :) только деление через вычитание
 
@@ -108,22 +127,22 @@ namespace NewCalc
             BigInt result = new BigInt();
             BigInt largiest = new BigInt();
             BigInt lowest = new BigInt();
-            bool isNegativeResult = false;
-            WhatValueIsGreater compareResult = CompareValues(firstValue, secondValue);
+            bool isNegativeResult = false;            
+            int compareResult = firstValue.CompareTo(secondValue);
 
-            if (compareResult == WhatValueIsGreater.First)
+            if (compareResult == 1)
             {
                 largiest = firstValue;
                 lowest = secondValue;
             }
-            else if (compareResult == WhatValueIsGreater.Second)
+            else if (compareResult == -1)
             {
                 largiest = secondValue;
                 lowest = firstValue;
                 isNegativeResult = true;
             }
-            else if (compareResult == WhatValueIsGreater.Same)
-                return new BigInt("0");
+            else if (compareResult == 0)
+                return new BigInt(0);
 
             largiest.digits.Reverse();
             lowest.digits.Reverse();
@@ -164,6 +183,9 @@ namespace NewCalc
         //Умножение
         private static BigInt Multiplication (BigInt firstValue, BigInt secondValue)
         {
+            if (firstValue == new BigInt(0) || secondValue == new BigInt(0))
+                return new BigInt("0");
+
             firstValue.digits.Reverse();
             secondValue.digits.Reverse();
             BigInt result = new BigInt();
@@ -196,23 +218,22 @@ namespace NewCalc
 
         //Деление
         private static BigInt Division (BigInt divisible, BigInt divider)
-        {
-            WhatValueIsGreater compare = CompareValues(divisible, divider);
+        {            
+            int compare = divisible.CompareTo(divider);          
 
-            if (compare == WhatValueIsGreater.Second)
+            if (compare == -1)
                 return new BigInt("0");
-            if (compare == WhatValueIsGreater.Same)
-                return new BigInt("1");
+            if (compare == 0)
+                return new BigInt(1);
 
-            BigInt counter = new BigInt();
-            BigInt temp = divisible;
+            BigInt counter = new BigInt();            
 
-            while (temp.digits[0] != 0 && temp.isNegativeValue != true)
+            while (divisible.digits[0] != 0 && divisible.isNegativeValue != true)
             {
-                temp -= divider;
+                divisible = Substraction(new BigInt(divisible.ToString()), new BigInt(divider.ToString()));
 
-                if (temp.digits[0] != 0 || temp.isNegativeValue != true)
-                    counter = Addition(counter, new BigInt("1"));
+                if (divisible.digits[0] != 0 && divisible.isNegativeValue != true)
+                    counter = Addition(counter, new BigInt(1));
             }
 
             return counter;
@@ -235,8 +256,22 @@ namespace NewCalc
         }
         public static BigInt operator / (BigInt first, BigInt second)
         {
+            if (second.digits[0] == 0)
+                throw new DivideByZeroException();
+
             return Division(first, second);            
         }
+        public static bool operator ==(BigInt first, BigInt second)
+        {
+            int compare = first.CompareTo(second);
 
+            return compare == 0 ? true : false;
+        }
+        public static bool operator !=(BigInt first, BigInt second)
+        {
+            int compare = first.CompareTo(second);
+
+            return compare == 0 ? false : true;
+        }
     }
 }

@@ -11,22 +11,25 @@ namespace NewCalc
         {
             while (true)
             {
-                string firstValue;
-                string secondValue;
-                string result = "";
+                string firstValue = string.Empty;
+                string secondValue = string.Empty;
+                string result = string.Empty;
                 char operation;
                 char[] validOperations = { '+', '-', '*', '/' };
 
-                while (true)
-                {
-                    Console.WriteLine("Введите первое число");
-                    firstValue = Console.ReadLine();
 
-                    if (CheckValue(firstValue))
-                        break;
-                    else
-                        Console.WriteLine("Ошибка, некорректные данные, попробуйте еще раз");
+                // это просто показывает работу реализации интерфейса IComparable
+                BigInt[] numbersForSorting = { new BigInt(100), new BigInt(15), new BigInt(45345), new BigInt("44"), new BigInt(500), new BigInt(-500) };
+                Array.Sort(numbersForSorting);
+                foreach (var number in numbersForSorting)
+                {
+                    Console.WriteLine(number);
                 }
+
+                Console.WriteLine("Введите первое число");
+                firstValue = GetValue();
+
+
 
                 while (true)
                 {
@@ -38,22 +41,12 @@ namespace NewCalc
                         break;
                     }
                     else
-                    {
                         Console.WriteLine("Неверный оператор, попробуйте еще раз");
-                    }
                 }
 
-                while (true)
-                {
-                    Console.WriteLine("Введите второе число");
 
-                    secondValue = Console.ReadLine();
-
-                    if (CheckValue(secondValue))
-                        break;
-                    else
-                        Console.WriteLine("Ошибка, некорректные данные, попробуйте еще раз");
-                }
+                Console.WriteLine("Введите второе число");
+                secondValue = GetValue();
 
 
                 switch (operation)
@@ -67,7 +60,7 @@ namespace NewCalc
                     case '*':
                         result = (new BigInt(firstValue) * new BigInt(secondValue)).ToString();
                         break;
-                    case '/':                        
+                    case '/':
                         result = (new BigInt(firstValue) / new BigInt(secondValue)).ToString();
                         break;
                     default:
@@ -79,6 +72,22 @@ namespace NewCalc
             }
 
 
+            string GetValue()
+            {
+                string result = string.Empty;
+
+                while (true)
+                {                    
+                    result = Console.ReadLine();
+                    if (CheckValue(result))
+                        break;
+                    else
+                        Console.WriteLine("Ошибка, некорректные данные, попробуйте еще раз");
+                }
+
+                return result;
+            }
+            
             bool CheckValue(string value)
             {
                 foreach (var symbol in value)
