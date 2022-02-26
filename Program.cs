@@ -11,64 +11,72 @@ namespace NewCalc
         {
             while (true)
             {
-                string firstValue = string.Empty;
-                string secondValue = string.Empty;
-                string result = string.Empty;
-                char operation;
-                char[] validOperations = { '+', '-', '*', '/' };
-
-
-                // это просто показывает работу реализации интерфейса IComparable
-                BigInt[] numbersForSorting = { new BigInt(100), new BigInt(15), new BigInt(45345), new BigInt("44"), new BigInt(500), new BigInt(-500) };
-                Array.Sort(numbersForSorting);
-                foreach (var number in numbersForSorting)
+                try
                 {
-                    Console.WriteLine(number);
-                }
+                    string firstValue = string.Empty;
+                    string secondValue = string.Empty;
+                    string result = string.Empty;
+                    char operation;
+                    char[] validOperations = { '+', '-', '*', '/' };
 
-                Console.WriteLine("Введите первое число");
-                firstValue = GetValue();
 
-
-
-                while (true)
-                {
-                    Console.WriteLine("Желаемая математическая операция (+ - * /)");
-
-                    if (char.TryParse(Console.ReadLine(), out char oper) && validOperations.Contains(oper))
+                    // это просто показывает работу реализации интерфейса IComparable
+                    BigInt[] numbersForSorting = { new BigInt(100), new BigInt(15), new BigInt(45345), new BigInt("44"), new BigInt(500), new BigInt(-500) };
+                    Array.Sort(numbersForSorting);
+                    foreach (var number in numbersForSorting)
                     {
-                        operation = oper;
-                        break;
+                        Console.WriteLine(number);
                     }
-                    else
-                        Console.WriteLine("Неверный оператор, попробуйте еще раз");
+
+                    Console.WriteLine("Введите первое число");
+                    firstValue = GetValue();
+
+
+
+                    while (true)
+                    {
+                        Console.WriteLine("Желаемая математическая операция (+ - * /)");
+
+                        if (char.TryParse(Console.ReadLine(), out char oper) && validOperations.Contains(oper))
+                        {
+                            operation = oper;
+                            break;
+                        }
+                        else
+                            Console.WriteLine("Неверный оператор, попробуйте еще раз");
+                    }
+
+
+                    Console.WriteLine("Введите второе число");
+                    secondValue = GetValue();
+
+
+                    switch (operation)
+                    {
+                        case '+':
+                            result = (new BigInt(firstValue) + new BigInt(secondValue)).ToString();
+                            break;
+                        case '-':
+                            result = (new BigInt(firstValue) - new BigInt(secondValue)).ToString();
+                            break;
+                        case '*':
+                            result = (new BigInt(firstValue) * new BigInt(secondValue)).ToString();
+                            break;
+                        case '/':
+                            result = (new BigInt(firstValue) / new BigInt(secondValue)).ToString();
+                            break;
+                        default:
+                            Console.WriteLine("something went wrong");
+                            break;
+                    }
+
+                    Console.WriteLine($"Результат: {result} \r\n");
                 }
-
-
-                Console.WriteLine("Введите второе число");
-                secondValue = GetValue();
-
-
-                switch (operation)
+                catch
                 {
-                    case '+':
-                        result = (new BigInt(firstValue) + new BigInt(secondValue)).ToString();
-                        break;
-                    case '-':
-                        result = (new BigInt(firstValue) - new BigInt(secondValue)).ToString();
-                        break;
-                    case '*':
-                        result = (new BigInt(firstValue) * new BigInt(secondValue)).ToString();
-                        break;
-                    case '/':
-                        result = (new BigInt(firstValue) / new BigInt(secondValue)).ToString();
-                        break;
-                    default:
-                        Console.WriteLine("something went wrong");
-                        break;
+                    Console.WriteLine("Что-то пошло не так, попробуйте еще раз");
                 }
-
-                Console.WriteLine($"Результат: {result} \r\n");
+                
             }
 
 

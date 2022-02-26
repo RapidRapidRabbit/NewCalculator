@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NewCalc
 {
-    public class BigInt : IComparable<BigInt>// IComparer<BigInt>
+    public class BigInt : IComparable<BigInt>
     {
         private List<byte> digits = new List<byte>(); // список для хранения цифр
 
@@ -219,10 +219,12 @@ namespace NewCalc
         //Деление
         private static BigInt Division (BigInt divisible, BigInt divider)
         {            
-            int compare = divisible.CompareTo(divider);          
+            int compare = divisible.CompareTo(divider);
 
+            if (divider.digits[0] == 0)
+                throw new DivideByZeroException();
             if (compare == -1)
-                return new BigInt("0");
+                return new BigInt(0);
             if (compare == 0)
                 return new BigInt(1);
 
@@ -242,36 +244,27 @@ namespace NewCalc
 
 
         // перегрузка необходимых операторов, другие можно добавить
-        public static BigInt operator + (BigInt first, BigInt second) 
+        public static BigInt operator + (BigInt first, BigInt second) => Addition(first, second);        
+        public static BigInt operator - (BigInt first, BigInt second) => Substraction(first, second);
+        public static BigInt operator *(BigInt first, BigInt second) => Multiplication(first, second);
+        public static BigInt operator /(BigInt first, BigInt second) => Division(first, second);
+        public static bool operator <(BigInt first, BigInt second) => first.CompareTo(second) < 0;       
+        public static bool operator >(BigInt first, BigInt second) => first.CompareTo(second) > 0;
+        public static bool operator <=(BigInt first, BigInt second) => first.CompareTo(second) <= 0;
+        public static bool operator >=(BigInt first, BigInt second) => first.CompareTo(second) >= 0;
+        public static bool operator ==(BigInt first, BigInt second) => first.CompareTo(second) == 0;
+        public static bool operator !=(BigInt first, BigInt second) => first.CompareTo(second) != 0;
+        
+        public override bool Equals(object obj)
         {
-            return Addition(first, second);
-        }
-        public static BigInt operator - (BigInt first, BigInt second)
-        {            
-            return Substraction(first, second);            
-        }
-        public static BigInt operator * (BigInt first, BigInt second)
-        {            
-            return Multiplication(first, second);
-        }
-        public static BigInt operator / (BigInt first, BigInt second)
-        {
-            if (second.digits[0] == 0)
-                throw new DivideByZeroException();
+            if (obj is BigInt number)
+                return this == number;
 
-            return Division(first, second);            
+            return false;
         }
-        public static bool operator ==(BigInt first, BigInt second)
+        public override int GetHashCode()
         {
-            int compare = first.CompareTo(second);
-
-            return compare == 0 ? true : false;
-        }
-        public static bool operator !=(BigInt first, BigInt second)
-        {
-            int compare = first.CompareTo(second);
-
-            return compare == 0 ? false : true;
+            return base.GetHashCode();
         }
     }
 }
