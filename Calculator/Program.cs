@@ -13,23 +13,24 @@ namespace NewCalc
             {
                 try
                 {
-                    string firstValue = string.Empty;
-                    string secondValue = string.Empty;
-                    string result = string.Empty;
+                    BigInt firstValue = new BigInt(0);
+                    BigInt secondValue = new BigInt(0);
+                    BigInt result = new BigInt(0);
                     char operation;
                     char[] validOperations = { '+', '-', '*', '/' };
 
 
-                    // это просто показывает работу реализации интерфейса IComparable
-                    BigInt[] numbersForSorting = { new BigInt(100), new BigInt(15), new BigInt(45345), new BigInt("44"), new BigInt(500), new BigInt(-500) };
+                    // cледующее просто показывает работу реализации интерфейса IComparable
+
+                    /*BigInt[] numbersForSorting = { new BigInt(100), new BigInt(15), new BigInt(45345), new BigInt("44"), new BigInt(500), new BigInt(-500) };
                     Array.Sort(numbersForSorting);
                     foreach (var number in numbersForSorting)
                     {
                         Console.WriteLine(number);
-                    }
+                    }*/
 
                     Console.WriteLine("Введите первое число");
-                    firstValue = GetValue();
+                    firstValue = new BigInt(GetValue());
 
 
 
@@ -48,22 +49,22 @@ namespace NewCalc
 
 
                     Console.WriteLine("Введите второе число");
-                    secondValue = GetValue();
+                    secondValue = new BigInt(GetValue());
 
 
                     switch (operation)
                     {
                         case '+':
-                            result = (new BigInt(firstValue) + new BigInt(secondValue)).ToString();
+                            result = firstValue + secondValue;
                             break;
                         case '-':
-                            result = (new BigInt(firstValue) - new BigInt(secondValue)).ToString();
+                            result = firstValue - secondValue;
                             break;
                         case '*':
-                            result = (new BigInt(firstValue) * new BigInt(secondValue)).ToString();
+                            result = firstValue * secondValue;
                             break;
                         case '/':
-                            result = (new BigInt(firstValue) / new BigInt(secondValue)).ToString();
+                            result = firstValue / secondValue;
                             break;
                         default:
                             Console.WriteLine("something went wrong");
@@ -79,21 +80,20 @@ namespace NewCalc
                 
             }
 
-
             string GetValue()
             {
-                string result = string.Empty;
+                string value = string.Empty;
 
                 while (true)
-                {                    
-                    result = Console.ReadLine();
-                    if (CheckValue(result))
+                {
+                    value = Console.ReadLine();
+                    if (CheckValue(value))
                         break;
                     else
                         Console.WriteLine("Ошибка, некорректные данные, попробуйте еще раз");
                 }
 
-                return result;
+                return value;
             }
             
             bool CheckValue(string value)
