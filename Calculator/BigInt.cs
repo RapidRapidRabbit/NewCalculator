@@ -12,7 +12,7 @@ namespace NewCalc
 
         public bool isNegativeValue { get; private set; } // отрицательное ли значение
         
-        public int Length { get { return this.digits.Count(); } } // просто длина числового значения для удобства
+        public int Length { get { return this.digits.Count(); } } // просто длина числового значения для удобства        
 
 
         // конструкторы из строки или числа, можно добавить другие при необходимости
@@ -184,7 +184,7 @@ namespace NewCalc
         private static BigInt Multiplication (BigInt firstValue, BigInt secondValue)
         {
             if (firstValue == new BigInt(0) || secondValue == new BigInt(0))
-                return new BigInt("0");
+                return new BigInt(0);
 
             firstValue.digits.Reverse();
             secondValue.digits.Reverse();
