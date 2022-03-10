@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NewCalc
 {
-    public class BigInt : IComparable<BigInt>
+    public class BigInt : IComparable<BigInt> , ICloneable
     {
         private List<byte> digits = new List<byte>(); // список для хранения цифр
 
@@ -16,7 +16,7 @@ namespace NewCalc
 
 
         // конструкторы из строки или числа, можно добавить другие при необходимости
-        public BigInt() { }
+        private BigInt() { }
         public BigInt(string value) 
         {
             if (value[0] == '-')
@@ -39,7 +39,7 @@ namespace NewCalc
 
             while (value > 0)
             {
-                digits.Insert(0,((byte)(value % 10)));
+                digits.Insert(0,(byte)(value % 10));
                 value /= 10;
             }
         }
@@ -94,20 +94,22 @@ namespace NewCalc
         //cложение
         private static BigInt Addition (BigInt firstValue, BigInt secondValue)
         {
-            firstValue.digits.Reverse();
-            secondValue.digits.Reverse();
-            BigInt result = new BigInt();
+            BigInt first = (BigInt)firstValue.Clone();
+            BigInt second = (BigInt)secondValue.Clone();
+            first.digits.Reverse();
+            second.digits.Reverse();
+            BigInt result = new();
             byte temp = 0;
 
-            for(int i = 0; i < firstValue.Length || i < secondValue.Length; i++)
+            for(int i = 0; i < first.Length || i < second.Length; i++)
             {
                 byte digit = 0;
 
-                if (i < firstValue.Length)
-                    digit += firstValue.digits[i];
+                if (i < first.Length)
+                    digit += first.digits[i];
 
-                if (i < secondValue.Length)
-                    digit += secondValue.digits[i];
+                if (i < second.Length)
+                    digit += second.digits[i];
 
                 digit += temp;
                 
@@ -124,21 +126,21 @@ namespace NewCalc
         //вычитание
         private static BigInt Substraction (BigInt firstValue, BigInt secondValue)
         {
-            BigInt result = new BigInt();
-            BigInt largiest = new BigInt();
-            BigInt lowest = new BigInt();
+            BigInt result = new();
+            BigInt largiest = new();
+            BigInt lowest = new();
             bool isNegativeResult = false;            
             int compareResult = firstValue.CompareTo(secondValue);
 
             if (compareResult == 1)
             {
-                largiest = firstValue;
-                lowest = secondValue;
+                largiest = (BigInt)firstValue.Clone();
+                lowest = (BigInt)secondValue.Clone();
             }
             else if (compareResult == -1)
             {
-                largiest = secondValue;
-                lowest = firstValue;
+                largiest = (BigInt)secondValue.Clone();
+                lowest = (BigInt)firstValue.Clone();
                 isNegativeResult = true;
             }
             else if (compareResult == 0)
@@ -186,18 +188,20 @@ namespace NewCalc
             if (firstValue == new BigInt(0) || secondValue == new BigInt(0))
                 return new BigInt(0);
 
-            firstValue.digits.Reverse();
-            secondValue.digits.Reverse();
-            BigInt result = new BigInt();
+            BigInt first = (BigInt)firstValue.Clone();
+            BigInt second = (BigInt)secondValue.Clone();
+            first.digits.Reverse();
+            second.digits.Reverse();
+            BigInt result = new();
 
-            for(int i = 0; i < firstValue.Length; i++)
+            for(int i = 0; i < first.Length; i++)
             {
-                for (int j = 0, carry = 0; j < secondValue.Length || carry > 0; j++)
+                for (int j = 0, carry = 0; j < second.Length || carry > 0; j++)
                 {
                     int current = 0;
                     int previous = (i + j) < result.Length ? result.digits[i + j] : 0;
-                    int currentA = i < firstValue.Length ? firstValue.digits[i] : 0;
-                    int currentB = j < secondValue.Length ? secondValue.digits[j] : 0;
+                    int currentA = i < first.Length ? first.digits[i] : 0;
+                    int currentB = j < second.Length ? second.digits[j] : 0;
 
                     current = previous + currentA * currentB + carry;
 
@@ -228,10 +232,10 @@ namespace NewCalc
             if (compare == 0)
                 return new BigInt(1);
 
-            BigInt counter = new BigInt();            
+            BigInt counter = new(0);            
 
             while (divisible.digits[0] != 0 && divisible.isNegativeValue != true)
-            {
+            {                
                 divisible = Substraction(new BigInt(divisible.ToString()), new BigInt(divider.ToString()));
 
                 if (divisible.digits[0] != 0 && divisible.isNegativeValue != true)
@@ -241,7 +245,7 @@ namespace NewCalc
             return counter;
         }
 
-
+        public object Clone() => new BigInt(this.ToString());        
 
         // перегрузка необходимых операторов, другие можно добавить
         public static BigInt operator + (BigInt first, BigInt second) => Addition(first, second);        
@@ -265,6 +269,6 @@ namespace NewCalc
         public override int GetHashCode()
         {
             return base.GetHashCode();
-        }
+        }        
     }
 }
