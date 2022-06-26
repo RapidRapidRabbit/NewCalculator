@@ -234,8 +234,7 @@ namespace NewCalc
                     else
                     {
                         result._digits[i + j] = toCollection;
-                    }
-                        
+                    }                        
 
                     carry = current / 10;
                 }
@@ -248,13 +247,11 @@ namespace NewCalc
 
         //Деление
         private static BigInt Division (BigInt divisible, BigInt divider)
-        {            
-            int compare = divisible.CompareTo(divider);
-
+        {
             if (divider._digits[0] == 0)
                 throw new DivideByZeroException();
 
-            switch (compare)
+            switch (divisible.CompareTo(divider))
             {
                 case -1:
                     return new BigInt(0);
