@@ -6,70 +6,86 @@ namespace TestProject
 {
     public class BigIntTests
     {
-        private readonly BigInt Firstvalue = new BigInt("876543210");
-        private readonly BigInt Secondvalue = new BigInt("123456789");
-        private readonly BigInt Zero = new BigInt(0);
-
+        private readonly BigInt _firstValue = new("876543210");
+        private readonly BigInt _secondValue = new("123456789");
+        private readonly BigInt _zero = new(0);
 
         [Fact]
-        public void AdditionReturnsExpectedValue()
-        {            
-            BigInt expected = new BigInt("999999999");
+        public void Addition_ReturnsExpectedValue()
+        {
+            //Arrange
+            var expected = new BigInt("999999999");
 
-            BigInt actual = Firstvalue + Secondvalue;
-
-            Assert.Equal(expected, actual);
+            //Act and Assert
+            Assert.Equal(expected, _firstValue + _secondValue);
         }
 
         [Fact]
-        public void SubstractionReturnsExpectedValue()
+        public void Substraction_ReturnsExpectedValue()
         {
-            BigInt expected = new BigInt("753086421");
+            //Arrange
+            var expected = new BigInt("753086421");
 
-            BigInt actual = Firstvalue - Secondvalue;
-
-            Assert.Equal(expected, actual);
+            //Act and Assert
+            Assert.Equal(expected, _firstValue - _secondValue);
         }        
 
         [Fact]
-        public void DivisionReturnsExpectedValue()
+        public void Division_ReturnsExpectedValue()
         {
-            BigInt expected = new BigInt(7);
+            //Arrange
+            var expected = new BigInt(7);
 
-            BigInt actual = Firstvalue / Secondvalue;
-            BigInt shouldBeOne = Firstvalue / Firstvalue;
-            BigInt shouldbeZero = Secondvalue / Firstvalue;
-
-
-            Assert.Equal(Zero, shouldbeZero);
-            Assert.Equal(new BigInt(1), shouldBeOne);
-            Assert.Equal(expected, actual);
+            //Act and Assert
+            Assert.Equal(expected, _firstValue / _secondValue);
         }
 
         [Fact]
-        public void MultiplicationReturnsExpectedValue()
+        public void Division_DivisionByTheSameValue_Returns_1()
         {
-            BigInt expected = new BigInt("108215210126352690");
-
-            BigInt actual = Firstvalue * Secondvalue;
-            BigInt shouldBeZero = Firstvalue * Zero;
-
-            Assert.Equal(Zero, shouldBeZero);
-            Assert.Equal(expected, actual);
+            //Act and Assert
+            Assert.Equal(new BigInt(1), _firstValue / _firstValue);
         }
 
         [Fact]
-        public void SubstractionAddsNegativeSign()
+        public void Division_DivisonByTheLargerValue_Returns_0()
         {
-            BigInt actual = Secondvalue - Firstvalue;
+            //Act and Assert
+            Assert.Equal(_zero, _secondValue / _firstValue);
+        }
 
+        [Fact]
+        public void Multiplication_ReturnsExpectedValue()
+        {
+            //Arrange
+            var expected = new BigInt("108215210126352690");
+
+            //Act and Assert
+            Assert.Equal(expected, _firstValue * _secondValue);
+        }
+
+        [Fact]
+        public void Multiplication_MultiplicationByZero_Returns_0()
+        {
+            //Act and Assert
+            Assert.Equal(_zero, _firstValue * _zero);
+        }
+
+        [Fact]
+        public void Substraction_AddsNegativeSign()
+        {
+            //Act
+            var actual = _secondValue - _firstValue;
+
+            //Assert
             Assert.Equal("-", actual.ToString()[0].ToString());
         }
 
         [Fact]        
-        public void DivisionByZeroThrowsDivideByZeroException()
+        public void Division_DivisionByZero_ThrowsDivideByZeroException()
         {
-            Assert.Throws<DivideByZeroException>(() => Firstvalue / Zero);
+            //Act and Assert
+            Assert.Throws<DivideByZeroException>(() => _firstValue / _zero);
         }       
     }
 }

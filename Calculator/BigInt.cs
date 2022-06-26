@@ -2,59 +2,66 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NewCalc
 {
     public class BigInt : IComparable<BigInt> , ICloneable
     {
-        private List<byte> digits = new List<byte>(); // список для хранения цифр
+        private readonly List<byte> _digits = new(); // список для хранения цифр
 
-        public bool isNegativeValue { get; private set; } // отрицательное ли значение
+        public bool IsNegativeValue { get; private set; } // отрицательное ли значение
         
-        public int Length { get { return this.digits.Count(); } } // просто длина числового значения для удобства        
+        public int Length => _digits.Count(); // просто длина числового значения для удобства        
 
 
         // конструкторы из строки или числа, можно добавить другие при необходимости
-        private BigInt() { }
+        private BigInt()
+        {
+
+        }
+
         public BigInt(string value) 
         {
             if (value[0] == '-')
-                isNegativeValue = true;
+                IsNegativeValue = true;
+
             foreach (var c in value)
             {
-                digits.Add(Convert.ToByte(c.ToString()));
+                _digits.Add(Convert.ToByte(c.ToString()));
             }            
         }
+
         public BigInt(int value)
         {
-            if (value < 0)
+            switch (value)
             {
-                isNegativeValue = true;
-                value *= -1;
+                case < 0:
+                    IsNegativeValue = true;
+                    value *= -1;
+                    break;
+                case 0:
+                    _digits.Add(0);
+                    break;
             }
-            else if (value == 0)            
-                digits.Add(0);
-            
 
             while (value > 0)
             {
-                digits.Insert(0,(byte)(value % 10));
+                _digits.Insert(0,(byte)(value % 10));
                 value /= 10;
             }
         }
-        
-
 
         // свой ToString, возвращает значение 
         public override string ToString()
         {
             var result = new StringBuilder();
 
-            if (isNegativeValue)
-                result.Append("-");
+            if (IsNegativeValue)
+            {
+                result.Append('-');
+            }
 
-            foreach (var digit in this.digits)
+            foreach (var digit in _digits)
             {
                 result.Append(digit);
             }
@@ -66,39 +73,46 @@ namespace NewCalc
        //реализация IComparable<T>
         public int CompareTo(BigInt obj)
         {
-            if (this.isNegativeValue == false && obj.isNegativeValue == true)
-                return 1;
-            if (this.isNegativeValue == true && obj.isNegativeValue == false)
-                return -1;
-
-            if (this.Length > obj.Length)
-                return 1;
-            else if (obj.Length > this.Length)
-                return -1;
-
-            else
+            switch (IsNegativeValue)
             {
-                for (int i = 0; i < this.Length; i++)
-                {
-                    if (this.digits[i] > obj.digits[i])
-                        return 1;
-                    if (obj.digits[i] > this.digits[i])
-                        return -1;
-                }
+                case false when obj.IsNegativeValue:
+                    return 1;
+
+                case true when obj.IsNegativeValue == false:
+                    return -1;
             }
+
+            if (Length > obj.Length)
+                return 1;
+
+            if (obj.Length > Length)
+                return -1;
+
+            for (int i = 0; i < Length; i++)
+            {
+                if (_digits[i] > obj._digits[i])
+                    return 1;
+                if (obj._digits[i] > _digits[i])
+                    return -1;
+            }
+
             return 0;            
-        }       
+        }
 
         // далее идут методы арифметических вычислений, все построены на принципе вычислений в столбик :) только деление через вычитание
+
+        #region AriphmeticOperations
 
         //cложение
         private static BigInt Addition (BigInt firstValue, BigInt secondValue)
         {
-            BigInt first = (BigInt)firstValue.Clone();
-            BigInt second = (BigInt)secondValue.Clone();
-            first.digits.Reverse();
-            second.digits.Reverse();
+            var first = (BigInt)firstValue.Clone();
+            var second = (BigInt)secondValue.Clone();
+            first._digits.Reverse();
+            second._digits.Reverse();
+
             BigInt result = new();
+
             byte temp = 0;
 
             for(int i = 0; i < first.Length || i < second.Length; i++)
@@ -106,19 +120,19 @@ namespace NewCalc
                 byte digit = 0;
 
                 if (i < first.Length)
-                    digit += first.digits[i];
+                    digit += first._digits[i];
 
                 if (i < second.Length)
-                    digit += second.digits[i];
+                    digit += second._digits[i];
 
                 digit += temp;
                 
-                result.digits.Insert(0,(byte)(digit % 10));
+                result._digits.Insert(0,(byte)(digit % 10));
                 temp = (byte)(digit / 10);
             }
 
             if (temp != 0)
-                result.digits.Insert(0, temp);
+                result._digits.Insert(0, temp);
            
             return result;
         }
@@ -126,36 +140,39 @@ namespace NewCalc
         //вычитание
         private static BigInt Substraction (BigInt firstValue, BigInt secondValue)
         {
-            BigInt result = new();
-            BigInt largiest = new();
-            BigInt lowest = new();
-            bool isNegativeResult = false;            
-            int compareResult = firstValue.CompareTo(secondValue);
+            var result = new BigInt();
+            var largiest = new BigInt();
+            var lowest = new BigInt();
+            bool isNegativeResult = false;
 
-            if (compareResult == 1)
+            switch (firstValue.CompareTo(secondValue))
             {
-                largiest = (BigInt)firstValue.Clone();
-                lowest = (BigInt)secondValue.Clone();
-            }
-            else if (compareResult == -1)
-            {
-                largiest = (BigInt)secondValue.Clone();
-                lowest = (BigInt)firstValue.Clone();
-                isNegativeResult = true;
-            }
-            else if (compareResult == 0)
-                return new BigInt(0);
+                case 1:
+                    largiest = (BigInt)firstValue.Clone();
+                    lowest = (BigInt)secondValue.Clone();
+                    break;
 
-            largiest.digits.Reverse();
-            lowest.digits.Reverse();
+                case -1:
+                    largiest = (BigInt)secondValue.Clone();
+                    lowest = (BigInt)firstValue.Clone();
+                    isNegativeResult = true;
+                    break;
+
+                case 0:
+                    return new BigInt(0);
+            }
+
+            largiest._digits.Reverse();
+            lowest._digits.Reverse();
+
             byte temp = 0;
 
             for(int i = 0; i < largiest.Length; i++)
             {
-                int digit = largiest.digits[i] - temp;
+                int digit = largiest._digits[i] - temp;
 
                 if (i < lowest.Length)
-                    digit = digit - lowest.digits[i];
+                    digit -= lowest._digits[i];
 
                 if (digit < 0)
                 {
@@ -165,19 +182,23 @@ namespace NewCalc
                 else
                     temp = 0;
 
-                result.digits.Add((byte)digit);
+                result._digits.Add((byte)digit);
             }
 
             for (int i = result.Length - 1; i > 0; i--)
             {
-                if (result.digits[i] == 0)
-                    result.digits.RemoveAt(i);
+                if (result._digits[i] == 0)
+                {
+                    result._digits.RemoveAt(i);
+                }
                 else
+                {
                     break;
+                }
             }
 
-            result.isNegativeValue = isNegativeResult;
-            result.digits.Reverse();
+            result.IsNegativeValue = isNegativeResult;
+            result._digits.Reverse();
             return result;
         }
 
@@ -188,34 +209,39 @@ namespace NewCalc
             if (firstValue == new BigInt(0) || secondValue == new BigInt(0))
                 return new BigInt(0);
 
-            BigInt first = (BigInt)firstValue.Clone();
-            BigInt second = (BigInt)secondValue.Clone();
-            first.digits.Reverse();
-            second.digits.Reverse();
+            var first = (BigInt)firstValue.Clone();
+            var second = (BigInt)secondValue.Clone();
+            first._digits.Reverse();
+            second._digits.Reverse();
             BigInt result = new();
 
             for(int i = 0; i < first.Length; i++)
             {
                 for (int j = 0, carry = 0; j < second.Length || carry > 0; j++)
                 {
-                    int current = 0;
-                    int previous = (i + j) < result.Length ? result.digits[i + j] : 0;
-                    int currentA = i < first.Length ? first.digits[i] : 0;
-                    int currentB = j < second.Length ? second.digits[j] : 0;
+                    int previous = i + j < result.Length ? result._digits[i + j] : 0;
+                    int currentA = i < first.Length ? first._digits[i] : 0;
+                    int currentB = j < second.Length ? second._digits[j] : 0;
 
-                    current = previous + currentA * currentB + carry;
+                    var current = previous + currentA * currentB + carry;
 
                     byte toCollection = (byte)(current % 10);
+
                     if (result.Length <= i + j)
-                        result.digits.Insert(i + j, toCollection);
+                    {
+                        result._digits.Insert(i + j, toCollection);
+                    }
                     else
-                        result.digits[i + j] = toCollection;
+                    {
+                        result._digits[i + j] = toCollection;
+                    }
+                        
 
                     carry = current / 10;
                 }
             }
 
-            result.digits.Reverse();
+            result._digits.Reverse();
             return result;
         }
 
@@ -225,27 +251,33 @@ namespace NewCalc
         {            
             int compare = divisible.CompareTo(divider);
 
-            if (divider.digits[0] == 0)
+            if (divider._digits[0] == 0)
                 throw new DivideByZeroException();
-            if (compare == -1)
-                return new BigInt(0);
-            if (compare == 0)
-                return new BigInt(1);
+
+            switch (compare)
+            {
+                case -1:
+                    return new BigInt(0);
+                case 0:
+                    return new BigInt(1);
+            }
 
             BigInt counter = new(0);            
 
-            while (divisible.digits[0] != 0 && divisible.isNegativeValue != true)
+            while (divisible._digits[0] != 0 && divisible.IsNegativeValue != true)
             {                
                 divisible = Substraction(new BigInt(divisible.ToString()), new BigInt(divider.ToString()));
 
-                if (divisible.digits[0] != 0 && divisible.isNegativeValue != true)
+                if (divisible._digits[0] != 0 && divisible.IsNegativeValue != true)
                     counter = Addition(counter, new BigInt(1));
             }
 
             return counter;
         }
 
-        public object Clone() => new BigInt(this.ToString());        
+        #endregion
+
+        public object Clone() => new BigInt(ToString());        
 
         // перегрузка необходимых операторов, другие можно добавить
         public static BigInt operator + (BigInt first, BigInt second) => Addition(first, second);        
@@ -266,9 +298,5 @@ namespace NewCalc
 
             return false;
         }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }        
     }
 }
